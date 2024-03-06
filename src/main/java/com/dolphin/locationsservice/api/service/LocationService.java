@@ -6,6 +6,7 @@ import com.dolphin.locationsservice.store.entity.LocationEntity;
 import com.dolphin.locationsservice.store.repositories.LocationRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ValidationException;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -41,23 +42,9 @@ public class LocationService {
     }
 
     public void updateLocationById(Long id, Location location) {
-        LocationEntity locationEntity = repository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Location doesn't exist"));
+        LocationEntity locationEntity = getLocationEntityOrEntityNotFoundException(id, location);
 
-        boolean changes = false;
-
-        if (changes)
-            throw new ValidationException("No changes were made");
-
-        if (locationEntity.getAddress() != null && !locationEntity.getAddress().equals(location.getAddress())) {
-            locationEntity.setAddress(location.getAddress());
-            changes = true;
-        }
-
-        if (!(locationEntity.getCapacity() == location.getCapacity())) {
-            locationEntity.setCapacity(location.getCapacity());
-            changes = true;
-        }
+        BeanUtils.copyProperties(location, locationEntity, "id");
 
         repository.save(locationEntity);
     }
@@ -67,5 +54,10 @@ public class LocationService {
                 .orElseThrow(() -> new EntityNotFoundException("Location doesn't exist"));
 
         repository.deleteById(locationEntity.getId());
+    }
+
+    private LocationEntity getLocationEntityOrEntityNotFoundException(Long id, Location location) {
+        return repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Location doesn't exist"));
     }
 }

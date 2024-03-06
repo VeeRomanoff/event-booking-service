@@ -3,6 +3,7 @@ package com.dolphin.locationsservice.api.exception;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -17,7 +18,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
     public ResponseEntity<ErrorMessageDto> handleNotFoundException(EntityNotFoundException exception) {
         String message = exception.getMessage();
-        ErrorMessageDto errorMessageDto = new ErrorMessageDto(message, message, LocalDateTime.now());
+        String detailedMessage = exception.toString();
+        ErrorMessageDto errorMessageDto = new ErrorMessageDto(message, detailedMessage, LocalDateTime.now());
 
         return new ResponseEntity<>(errorMessageDto, HttpStatus.NOT_FOUND);
     }
@@ -26,7 +28,17 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseEntity<ErrorMessageDto> handleGenericExceptions(Exception exception) {
         String message = exception.getMessage();
-        ErrorMessageDto errorMessageDto = new ErrorMessageDto(message, message, LocalDateTime.now());
+        String detailedMessage = exception.toString();
+        ErrorMessageDto errorMessageDto = new ErrorMessageDto(message, detailedMessage, LocalDateTime.now());
+
+        return new ResponseEntity<>(errorMessageDto, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<ErrorMessageDto> handleArgumentNotValidException(MethodArgumentNotValidException exception) {
+        String message = exception.getMessage();
+        ErrorMessageDto errorMessageDto = new ErrorMessageDto(message, exception.getDetailMessageCode(), LocalDateTime.now());
 
         return new ResponseEntity<>(errorMessageDto, HttpStatus.INTERNAL_SERVER_ERROR);
     }

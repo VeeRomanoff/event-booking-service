@@ -12,6 +12,4 @@ public class ErrorMessageDto {
         this.detailedMessage = detailedMessage;
         this.time = time;
     }
-
-
 }
